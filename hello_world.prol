@@ -1,0 +1,2 @@
+push "first_in_stack" print
+push "second_in_stack" print
