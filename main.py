@@ -17,7 +17,9 @@ def custom_split(str_buf: str) -> list[str]:
             continue
 
         if (char == " " or char == "\n") and not stop_space_parse:
-            str_split.append(word)
+            if word != "":
+                str_split.append(word)
+
             word = ""
         else: 
             word = f"{word}{char}"
@@ -32,6 +34,7 @@ class OP_CODE(Enum):
     NOP = 0x0000
     PRINT = 0x0001
     PUSH = 0x0002
+    PLUS = 0x0003
 
 
 class Token:
@@ -68,6 +71,9 @@ class Lexer:
                     print_arg
                 )
                 val_tokens.append(value_token)
+            elif operation == "+":
+                op_token: Token = Token(OP_CODE.PLUS)
+                op_tokens.append(op_token)
             else:
                 assert False, f"'{operation}' is not implemented in Lexer"
 
@@ -82,13 +88,33 @@ class Interpreter:
         self.op_tokens = tokens
         self.val_stack = val_stack
 
+    def normalize_numbrer(self, num):
+        if isinstance(num, str):
+            if "f" in num:
+                return float(num.replace("f", ""))
+            return int(num)
+
+        return num
+
     def evaluate(self) -> None:
         while len(self.op_tokens) > 0:
-            op_token: Token = self.op_tokens.pop()
+            op_token: Token = self.op_tokens.pop(0)
 
             if op_token.op_code == OP_CODE.PRINT:
                 value_token: Token = self.val_stack.pop(0)
                 print(f"{value_token.value}")
+            elif op_token.op_code == OP_CODE.PLUS:
+                value_token_1: Token = self.val_stack.pop(0)
+                value_token_2: Token = self.val_stack.pop(0)
+
+                value1 = self.normalize_numbrer(value_token_1.value)
+                value2 = self.normalize_numbrer(value_token_2.value)
+
+                new_val_token: Token = None
+
+                new_val_token = Token(OP_CODE.NOP, value1 + value2)
+
+                self.val_stack.insert(0, new_val_token)
             else:
                 assert False, f"{op_token.op_code} is not implemented in Interpreter"
 
