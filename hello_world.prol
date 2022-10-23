@@ -1,2 +1,2 @@
-push "first_in_stack" print
-push "second_in_stack" print
+push "first in stack" print
+push "second in stack" print
